@@ -14,10 +14,10 @@
       background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
       font-family: 'Helvetica Neue', Arial, sans-serif;
       display: flex; flex-direction: column;
-      overflow: hidden; 
+      overflow: hidden; /* 鎖定畫面，防止不小心滑動背景 */
     }
     
-    /* 頂部導覽列 */
+    /* 頂部導覽列 (返回鍵與頁碼) */
     .header {
       display: flex; justify-content: space-between; align-items: center;
       padding: 12px 20px;
@@ -28,30 +28,11 @@
       z-index: 10;
       flex-shrink: 0;
     }
-
-    .header-right {
-      display: flex; align-items: center; gap: 12px;
-    }
     
     .back-btn {
       padding: 8px 15px; background: white; border-radius: 20px;
       text-decoration: none; color: #333; font-weight: bold;
       font-size: 14px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    
-    /* 朗讀按鈕樣式 */
-    .read-btn {
-      padding: 8px 15px; background: #fff3cd; border: none; border-radius: 20px;
-      color: #856404; font-weight: bold; font-size: 14px; cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: all 0.3s;
-    }
-    .read-btn:active { transform: scale(0.95); }
-    .read-btn.playing { background: #ffc107; color: #000; animation: pulse 1.5s infinite; }
-
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.7); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 193, 7, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 193, 7, 0); }
     }
     
     .page-info {
@@ -60,7 +41,7 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     }
 
-    /* 繪本顯示區 */
+    /* 繪本顯示區 (完美置中單頁) */
     .canvas-container {
       flex: 1; 
       display: flex; justify-content: center; align-items: center;
@@ -70,7 +51,7 @@
     
     canvas {
       max-width: 100%; max-height: 100%;
-      object-fit: contain; 
+      object-fit: contain; /* 確保書本比例正確，不會變形 */
       box-shadow: 0 5px 15px rgba(0,0,0,0.2);
       border-radius: 4px; background: white;
     }
@@ -100,10 +81,7 @@
   <!-- 頂部介面 -->
   <div class="header">
     <a href="index.html" class="back-btn">⬅ 返回書架</a>
-    <div class="header-right">
-      <button class="read-btn" id="read-btn">🔊 朗讀本頁</button>
-      <div class="page-info"><span id="page-num">-</span> / <span id="page-count">-</span></div>
-    </div>
+    <div class="page-info">第 <span id="page-num">-</span> / <span id="page-count">-</span> 頁</div>
   </div>
 
   <!-- 繪本單頁呈現區 -->
@@ -124,27 +102,13 @@
     const bookFileName = urlParams.get('book');
     
     let pdfDoc = null, pageNum = 1, pageIsRendering = false, pageNumIsPending = null;
-    const scale = 1.5; 
+    const scale = 1.5; // 解析度倍率，適合手機螢幕
     const canvas = document.getElementById('pdf-render');
     const ctx = canvas.getContext('2d');
-    
-    // 朗讀功能變數
-    let currentPageText = "";
-    const readBtn = document.getElementById('read-btn');
-
-    // 停止朗讀的共用函式
-    const stopSpeaking = () => {
-      window.speechSynthesis.cancel();
-      readBtn.textContent = "🔊 朗讀本頁";
-      readBtn.classList.remove('playing');
-    };
 
     // 渲染畫面的函式
     const renderPage = num => {
       pageIsRendering = true;
-      stopSpeaking(); // 換頁時自動停止上一頁的朗讀
-      currentPageText = ""; // 清空上一頁文字
-
       pdfDoc.getPage(num).then(page => {
         const viewport = page.getViewport({ scale });
         canvas.height = viewport.height;
@@ -159,12 +123,7 @@
           }
         });
 
-        // 提取該頁的文字作為朗讀來源
-        page.getTextContent().then(textContent => {
-          currentPageText = textContent.items.map(item => item.str).join(" ");
-        });
-
-        // 更新介面
+        // 更新介面上的頁數與按鈕狀態
         document.getElementById('page-num').textContent = num;
         document.getElementById('prev-btn').disabled = num <= 1;
         document.getElementById('next-btn').disabled = num >= pdfDoc.numPages;
@@ -186,33 +145,6 @@
       pageNum++; queueRenderPage(pageNum);
     };
 
-    // 語音朗讀按鈕事件
-    readBtn.addEventListener('click', () => {
-      if (window.speechSynthesis.speaking) {
-        // 如果正在唸，就停止
-        stopSpeaking();
-      } else {
-        // 如果還沒開始唸
-        if (!currentPageText.trim()) {
-          alert("這頁沒有偵測到可以朗讀的文字喔！(如果這頁是純圖片就會唸不出來)");
-          return;
-        }
-        
-        const utterance = new SpeechSynthesisUtterance(currentPageText);
-        utterance.lang = 'zh-TW'; // 設定為台灣中文
-        utterance.rate = 0.9;     // 稍微放慢語速，比較像說故事
-        
-        utterance.onend = () => {
-          readBtn.textContent = "🔊 朗讀本頁";
-          readBtn.classList.remove('playing');
-        };
-
-        window.speechSynthesis.speak(utterance);
-        readBtn.textContent = "⏹ 停止朗讀";
-        readBtn.classList.add('playing');
-      }
-    });
-
     // 載入 PDF 檔案
     if (bookFileName) {
       const pdfPath = "pdfs/" + bookFileName;
@@ -228,9 +160,6 @@
     // 綁定按鈕點擊事件
     document.getElementById('prev-btn').addEventListener('click', showPrevPage);
     document.getElementById('next-btn').addEventListener('click', showNextPage);
-    
-    // 離開網頁時自動停止朗讀
-    window.addEventListener('beforeunload', stopSpeaking);
   </script>
 </body>
 </html>
