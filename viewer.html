@@ -5,46 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>繪本閱讀中...</title>
   
-  <link href="https://cdn.jsdelivr.net/npm/dflip@2.2.1/css/dflip.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/dflip@2.2.1/css/themify-icons.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/dflip@2.2.1/css/dflip.min.css" rel="stylesheet">
+  <link href="https://unpkg.com/dflip@2.2.1/css/themify-icons.min.css" rel="stylesheet">
   
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+    /* 強制滿版，避免手機把畫面壓縮 */
+    body, html { 
+      margin: 0; padding: 0; height: 100%; 
       background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
-      background-attachment: fixed;
-      font-family: 'Helvetica Neue', Arial, sans-serif;
-      display: flex;
-      flex-direction: column;
+      overflow: hidden; 
     }
     
-    .header {
-      padding: 15px 20px;
-      z-index: 10;
-      flex-shrink: 0;
+    /* 讓按鈕浮動在左上角，不影響書本空間 */
+    .header { position: absolute; top: 15px; left: 20px; z-index: 999; }
+    .back-btn { 
+      padding: 8px 20px; background: rgba(255,255,255,0.8); 
+      border-radius: 20px; text-decoration: none; color: #333; 
+      font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2); 
     }
     
-    .back-btn {
-      display: inline-block;
-      padding: 8px 20px;
-      background: rgba(255, 255, 255, 0.5);
-      border-radius: 20px;
-      text-decoration: none;
-      color: #333;
-      font-weight: bold;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-
-    /* 強制設定容器高度，防止瀏覽器將其壓縮為 0 */
-    .book-container {
-      flex: 1;
-      width: 100%;
-      height: calc(100vh - 70px) !important; 
-    }
+    /* 書本容器強制佔滿整個螢幕 */
+    #flipbookContainer { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
@@ -53,31 +34,27 @@
     <a href="index.html" class="back-btn">⬅ 返回書架</a>
   </div>
 
-  <div class="book-container" id="bookContainer">
-    </div>
+  <div id="flipbookContainer"></div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/dflip@2.2.1/js/dflip.min.js"></script>
+  <!-- 引入套件 -->
+  <script src="https://unpkg.com/jquery@3.6.0/dist/jquery.min.js"></script>
+  <script src="https://unpkg.com/dflip@2.2.1/js/dflip.min.js"></script>
 
   <script>
-    // 取得網址列的 book 參數 (例如 2.pdf)
     const urlParams = new URLSearchParams(window.location.search);
     const bookFileName = urlParams.get('book');
 
     if (bookFileName) {
       const pdfPath = "pdfs/" + bookFileName;
-
-      // 建立符合 dFlip 標準的自動渲染標籤
-      const flipbookDiv = document.createElement('div');
-      flipbookDiv.className = '_df_book';
-      flipbookDiv.setAttribute('source', pdfPath);
-      flipbookDiv.style.width = "100%";
-      flipbookDiv.style.height = "100%";
       
-      // 塞入網頁中，套件會自動接管並拔高畫面
-      document.getElementById('bookContainer').appendChild(flipbookDiv);
+      $(document).ready(function () {
+          $("#flipbookContainer").flipBook(pdfPath, {
+              backgroundColor: "transparent",
+              webgl: false // 【關鍵】關閉 WebGL，對手機支援度最高，不會白畫面！
+          });
+      });
     } else {
-      document.getElementById('bookContainer').innerHTML = "<h2 style='text-align:center; color:white; margin-top:50px;'>找不到繪本檔案</h2>";
+      document.getElementById('flipbookContainer').innerHTML = "<h2 style='text-align:center; color:white; margin-top:80px;'>找不到檔案</h2>";
     }
   </script>
 
