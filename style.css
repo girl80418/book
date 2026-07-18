@@ -1,0 +1,82 @@
+/* 夢幻漸層背景設定 */
+body {
+  font-family: 'Helvetica Neue', 'PingFang TC', '微軟正黑體', sans-serif;
+  /* 柔和的粉紫到粉藍漸層，並固定背景不隨捲動改變 */
+  background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+  background-attachment: fixed;
+  margin: 0;
+  padding: 0;
+  color: #333;
+}
+
+/* 網頁標題區域 */
+header {
+  text-align: center;
+  padding: 50px 20px 30px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: #fff;
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* 讓白色文字在漸層背景上發光 */
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+header p {
+  color: #fff;
+  font-size: 1.1rem;
+  opacity: 0.9;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* 單欄書單排版 (限制最大寬度，讓卡片置中) */
+.bookshelf {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* 每本書之間的間距 */
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+}
+
+/* 夢幻毛玻璃卡片特效 (每一本書的區塊) */
+.book {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.4); /* 半透明白色 */
+  backdrop-filter: blur(12px); /* 背景模糊特效 (蘋果iOS風格) */
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6); /* 卡片邊緣微光 */
+  border-radius: 20px; /* 圓角卡片 */
+  padding: 15px;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1); /* 柔和的陰影 */
+  transition: all 0.3s ease; /* 動畫過渡效果 */
+}
+
+/* 滑鼠碰到或手指點擊時的浮起與發光特效 */
+.book:hover, .book:active {
+  transform: translateY(-5px) scale(1.02);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 12px 40px rgba(31, 38, 135, 0.2);
+}
+
+/* 書籍封面圖片 */
+.book img {
+  width: 70px; /* 固定寬度，小巧精緻 */
+  height: 100px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0; /* 防止圖片被壓縮 */
+}
+
+/* 書名文字 */
+.book p {
+  margin-left: 20px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #4a4a4a;
+  line-height: 1.4;
+}
